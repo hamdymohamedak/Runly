@@ -22,6 +22,8 @@
     "dist"
   ],
   "scripts": {
+    "test": "node --test test/smoke.test.js",
+    "ci:runly-smoke": "node dist/cli.js -c examples/all-versions-pass/runly.config.mjs",
     "build": "tsc",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build",
