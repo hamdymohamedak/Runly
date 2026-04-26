@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Runly — run the same tests under multiple Node.js versions (Playwright-style matrix)",
+  "description": "Run the same command under multiple Node.js versions from one config (npx-resolved runtimes)",
   "type": "module",
   "bin": {
     "runly": "dist/cli.js"

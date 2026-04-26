@@ -15,7 +15,7 @@ export interface RunlyConfig {
   versions: string[];
   /**
    * Command run once per version with that version’s `node` first on PATH.
-   * Prefer `['node', './node_modules/vitest/vitest.mjs', 'run']` over `npm test` if you need strict control.
+   * Prefer an argv whose first token is `node` over shell-only `npm test` if you need strict control over the interpreter.
    */
   run: RunlyRun;
   /** Working directory for each run. Default: process.cwd() */

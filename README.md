@@ -1,41 +1,40 @@
 # Runly
 
-**Run the same test command under multiple Node.js versions**—similar in spirit to how [Playwright](https://playwright.dev/) runs one suite across multiple browser engines, but for the Node runtime matrix instead.
-
-Runly resolves each requested version via the official [`node`](https://www.npmjs.com/package/node) package (`npx`), prepends that binary to `PATH`, and executes your configured command. You get real runtime behavior per version without maintaining a local `nvm`/`fnm` layout for CI or your team.
+Runly is a small CLI and config helper that **runs the same command once per requested Node.js version**, with each run using that version’s `node` binary first on `PATH`. You define versions and the command in a single config file; Runly resolves each runtime via the official [`node`](https://www.npmjs.com/package/node) package through `npx`, so contributors and CI do not need a global version manager (nvm, fnm, asdf, and similar) installed to reproduce the matrix.
 
 ---
 
-## Why use this?
+## What you get
 
-- **Catch version-only failures**: APIs, module resolution, and syntax supported in one LTS line may break on another.
-- **One config, many runtimes**: Declare versions once; each row runs your tests with that Node first on `PATH`.
-- **No global version manager required**: Uses `npx` and the `node@<spec>` pattern so machines only need a recent Node and npm.
+- **Runtime matrix**: Same project, multiple Node lines—useful when you support more than one LTS or need to catch version-specific behavior.
+- **One config file**: Versions and the command to run live next to your repo; no per-machine Node layout to document beyond “install Node 18+ and npm”.
+- **Real binaries**: Each row uses an actual `node` executable for that spec (resolved with `npx --yes --package node@<spec>`), not a static compatibility guess.
+- **Clear output**: Stdio is inherited; each version is announced with a short banner so logs stay readable.
 
 ---
 
 ## Requirements
 
-- **Node.js** ≥ 18 (for running the Runly CLI itself).
-- **npm** with **`npx`** available (used to fetch `node@<version>` binaries). First runs may download caches; later runs are faster.
+- **Node.js** ≥ 18 (for the Runly CLI process).
+- **npm** with **npx** available. First-time resolution of a version may download packages; later runs reuse caches when possible.
 
 ---
 
 ## Installation
 
-### From npm
-
 ```bash
 npm install -D @hamdymohamedak/runly
 ```
 
-The CLI command is still **`runly`** (see `package.json` `bin`). From your project root, next to `runly.config.mjs`:
+The executable name is **`runly`** (see `bin` in `package.json`).
+
+From the directory that contains your config:
 
 ```bash
 npx runly
 ```
 
-To run without adding a devDependency:
+Without adding a dev dependency:
 
 ```bash
 npx @hamdymohamedak/runly
@@ -43,66 +42,68 @@ npx @hamdymohamedak/runly
 
 ---
 
-## Quick start
+## Configuration file
 
-1. Add a config file at the project root (first match wins):
+Runly looks for a config in the **current working directory**, in this order:
 
-   - `runly.config.mjs`
-   - `runly.config.js`
-   - `runly.config.cjs`
+1. `runly.config.mjs`
+2. `runly.config.js`
+3. `runly.config.cjs`
 
-2. Example `runly.config.mjs`:
+Override the path with `-c` / `--config` (see [CLI](#cli)).
 
-   ```javascript
-   export default {
-     versions: ["18", "20", "22"],
-     bail: false,
-     run: {
-       argv: ["node", "--test", "test/"],
-       shell: false,
-     },
-   };
-   ```
+The file must export a **default** object (or be the config object when loaded). The CLI loads JavaScript configs only. To use TypeScript for the config file itself, you would need to run through a loader you provide; Runly does not bundle one.
 
-3. From the directory that contains the config:
+### Options
 
-   ```bash
-   npx runly
-   ```
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `versions` | `string[]` | Yes | Non-empty list of Node version specs accepted by the npm `node` package (for example `"20"`, `"20.10.0"`, `"lts/*"`). Each entry is passed as `node@<spec>` when resolving the binary. |
+| `run` | `string` \| `{ argv: string[]; shell?: boolean }` | Yes | Command executed once per version. A **string** runs with `shell: true` (one line, shell parsing). An **object** with `argv` uses `child_process.spawn`; `shell` defaults to `false` unless you set `shell: true`. |
+| `cwd` | `string` | No | Working directory for every child. Default: Runly’s current working directory (usually your project root). |
+| `bail` | `boolean` | No | If `true`, stop after the first failing version. Default: `false` (run all versions and report all results). |
+| `env` | `object` | No | Extra environment variables merged into each child (on top of `process.env`). `PATH` is rewritten per run so the matrix `node` comes first. |
 
-   Or with an explicit config path:
+### Example: built-in test runner
 
-   ```bash
-   npx runly -c ./runly.config.mjs
-   ```
+```javascript
+// runly.config.mjs
+export default {
+  versions: ["18", "20", "22"],
+  bail: false,
+  run: {
+    argv: ["node", "--test", "test/"],
+    shell: false,
+  },
+};
+```
 
-Exit code **0** means every version passed; **1** means at least one version failed.
+### Example: npm script (shell)
 
----
+```javascript
+export default {
+  versions: ["18", "20", "22"],
+  run: "npm test",
+};
+```
 
-## Configuration
+With string / shell `run`, whichever `node` your script and dependencies pick up depends on how `npm` and your scripts are written. For **strict** control over the interpreter, prefer an `argv` array whose first element is `node` (so the prepended `PATH` applies directly).
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `versions` | `string[]` | **Required.** Node version specs for the `node` npm package (e.g. `"20"`, `"20.10.0"`, `"lts/*"`). |
-| `run` | `string` \| `{ argv: string[]; shell?: boolean }` | **Required.** Command executed once per version. String form runs in a shell (`shell: true`). Array form uses `spawn` with optional `shell`. |
-| `cwd` | `string` | Working directory for each child. Default: `process.cwd()` of the CLI. |
-| `bail` | `boolean` | Stop the matrix after the first failing version. Default: `false`. |
-| `env` | `object` | Extra environment variables merged into each run. |
+### Example: explicit `node` + project script
 
-### Recommended `run` patterns
+```javascript
+export default {
+  versions: ["20", "22"],
+  run: {
+    argv: ["node", "./scripts/run-tests.mjs"],
+    shell: false,
+  },
+};
+```
 
-- **Stable control**: point at the test runner with the matrix Node, for example:
+### TypeScript helper (`defineConfig`)
 
-  `["node", "./node_modules/vitest/vitest.mjs", "run"]`
-
-- **Shell one-liners**: `run: "npm test"` (uses `shell: true`).
-
-With `npm test`, behavior depends on how scripts invoke `node`; putting the desired `node` first on `PATH` works for typical setups.
-
-### TypeScript helper (optional)
-
-If you consume Runly as a library from compiled output:
+If you depend on Runly as a package, you can get typing and a conventional helper:
 
 ```javascript
 import { defineConfig } from "@hamdymohamedak/runly";
@@ -113,7 +114,7 @@ export default defineConfig({
 });
 ```
 
-The CLI loads **JavaScript** configs by default. TypeScript configs (`.ts`) are not loaded unless you run Node with a TypeScript loader yourself.
+Exported types include `RunlyConfig` and `RunlyRun` for use in your own tooling.
 
 ---
 
@@ -121,29 +122,40 @@ The CLI loads **JavaScript** configs by default. TypeScript configs (`.ts`) are 
 
 | Flag | Description |
 |------|-------------|
-| `-c`, `--config` | Path to a config file. If omitted, Runly looks for `runly.config.mjs`, then `.js`, then `.cjs` in the current working directory. |
+| `-c`, `--config` | Path to a config file. If omitted, Runly searches for `runly.config.mjs`, then `.js`, then `.cjs` in the current working directory. |
 
 ---
 
-## Example idea
+## Exit codes and errors
 
-If your tests rely on a **newer-only** Node API (for example a built-in module), running Runly across `18`, `20`, and `22` will show which lines pass and which fail—without static analysis, by executing the same command under each runtime.
+- **0**: Every configured version completed with exit code `0`.
+- **1**: At least one version failed, or Runly could not resolve a version / load config / run the matrix.
+
+On failure, Runly prints a short summary listing failed version specs.
 
 ---
 
-## How it works (short)
+## How Runly runs one version (internals)
 
-1. For each entry in `versions`, Runly runs `npx` to resolve the absolute path to that version’s `node` binary.
-2. It prepends that binary’s directory to `PATH` for the child process.
-3. It spawns your `run` command with inherited stdio so logs look like a normal local test run, prefixed by a banner per version.
+1. For each string in `versions`, Runly invokes `npx` with `--yes --package node@<spec>` and a small `node -e` snippet that prints `process.execPath`, obtaining an absolute path to that Node build.
+2. It prepends the directory containing that executable to `PATH` for the child process.
+3. It spawns your `run` command with `stdio: "inherit"` so output matches a normal local run, with a banner line before each version.
+
+On Windows, `npx.cmd` is used for the resolution step.
+
+---
+
+## Continuous integration
+
+Install dependencies as usual, ensure Node and npm are available, then invoke `npx runly` (or `npx @hamdymohamedak/runly`) from the repository root where the config lives. No extra global Node switcher is required on the runner image as long as `npx` can fetch the `node` package.
 
 ---
 
 ## Limitations
 
-- **Network**: First resolution of a version may hit the network via `npx`.
-- **Windows**: `npx.cmd` is used automatically on Windows for spawning.
-- **Config format**: Use `.mjs` / `.js` / `.cjs` unless you bring your own TS loader.
+- **Network**: Resolving a version for the first time may require network access for `npx` / npm.
+- **Windows**: Resolution uses `npx.cmd`; spawned commands follow Node’s usual Windows behavior.
+- **Config formats**: `.mjs`, `.js`, and `.cjs` only unless you supply your own loading path.
 
 ---
 
@@ -153,13 +165,9 @@ This project is released under the [MIT License](./LICENSE).
 
 ---
 
-## Acknowledgments
+## Links
 
-Inspired by the **multi-target** workflow popularized by browser test runners. Node is a trademark of the OpenJS Foundation; this project is not affiliated with or endorsed by them.
+- **npm package**: [https://www.npmjs.com/package/@hamdymohamedak/runly](https://www.npmjs.com/package/@hamdymohamedak/runly)
+- **Repository**: [https://github.com/hamdymohamedak/Runly](https://github.com/hamdymohamedak/Runly)
 
----
-
-## More
-
-- **Package on npm**: [npmjs.com/package/@hamdymohamedak/runly](https://www.npmjs.com/package/@hamdymohamedak/runly)
-- **Source and issues**: [github.com/hamdymohamedak/Vintest](https://github.com/hamdymohamedak/Vintest)
+Node.js is a trademark of the OpenJS Foundation. This project is not affiliated with or endorsed by them.
