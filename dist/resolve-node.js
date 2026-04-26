@@ -8,6 +8,7 @@ function npxCmd() {
 }
 export function resolveNodeExecPath(versionSpec, cwd) {
     return new Promise((resolve, reject) => {
+        const win32 = process.platform === "win32";
         const child = spawn(npxCmd(), [
             "--yes",
             "--package",
@@ -16,7 +17,7 @@ export function resolveNodeExecPath(versionSpec, cwd) {
             "node",
             "-e",
             "process.stdout.write(process.execPath)",
-        ], { cwd, stdio: ["ignore", "pipe", "pipe"] });
+        ], { cwd, stdio: ["ignore", "pipe", "pipe"], shell: win32 });
         let out = "";
         let err = "";
         child.stdout?.on("data", (c) => {

@@ -10,6 +10,9 @@ function npxCmd(): string {
 
 export function resolveNodeExecPath(versionSpec: string, cwd: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    // Windows: spawning `.cmd` without a shell often yields `spawn EINVAL` (Node + libuv).
+    // Use `shell: true` so `npx.cmd` runs under the default shell (cmd.exe).
+    const win32 = process.platform === "win32";
     const child = spawn(
       npxCmd(),
       [
@@ -21,7 +24,7 @@ export function resolveNodeExecPath(versionSpec: string, cwd: string): Promise<s
         "-e",
         "process.stdout.write(process.execPath)",
       ],
-      { cwd, stdio: ["ignore", "pipe", "pipe"] },
+      { cwd, stdio: ["ignore", "pipe", "pipe"], shell: win32 },
     );
     let out = "";
     let err = "";
