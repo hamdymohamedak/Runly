@@ -1,10 +1,13 @@
 {
-  "name": "runly",
+  "name": "@hamdymohamedak/runly",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Runly — run the same tests under multiple Node.js versions (Playwright-style matrix)",
   "type": "module",
   "bin": {
-    "runly": "./dist/cli.js"
+    "runly": "dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,11 +30,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hamdymohamedak/Vintest.git"
+    "url": "git+https://github.com/hamdymohamedak/Runly.git"
   },
-  "homepage": "https://github.com/hamdymohamedak/Vintest#readme",
+  "homepage": "https://github.com/hamdymohamedak/Runly#readme",
   "bugs": {
-    "url": "https://github.com/hamdymohamedak/Vintest/issues"
+    "url": "https://github.com/hamdymohamedak/Runly/issues"
   },
   "engines": {
     "node": ">=18"

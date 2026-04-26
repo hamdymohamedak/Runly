@@ -26,13 +26,19 @@ Runly resolves each requested version via the official [`node`](https://www.npmj
 ### From npm
 
 ```bash
-npm install -D runly
+npm install -D @hamdymohamedak/runly
 ```
 
-Run the CLI (from your project root, next to `runly.config.mjs`):
+The CLI command is still **`runly`** (see `package.json` `bin`). From your project root, next to `runly.config.mjs`:
 
 ```bash
 npx runly
+```
+
+To run without adding a devDependency:
+
+```bash
+npx @hamdymohamedak/runly
 ```
 
 ---
@@ -99,7 +105,7 @@ With `npm test`, behavior depends on how scripts invoke `node`; putting the desi
 If you consume Runly as a library from compiled output:
 
 ```javascript
-import { defineConfig } from "runly";
+import { defineConfig } from "@hamdymohamedak/runly";
 
 export default defineConfig({
   versions: ["18", "20", "22"],
@@ -155,5 +161,5 @@ Inspired by the **multi-target** workflow popularized by browser test runners. N
 
 ## More
 
-- **Package on npm**: [npmjs.com/package/runly](https://www.npmjs.com/package/runly)
+- **Package on npm**: [npmjs.com/package/@hamdymohamedak/runly](https://www.npmjs.com/package/@hamdymohamedak/runly)
 - **Source and issues**: [github.com/hamdymohamedak/Vintest](https://github.com/hamdymohamedak/Vintest)
