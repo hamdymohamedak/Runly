@@ -1,22 +1,10 @@
 #!/usr/bin/env node
-import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { resolveRunlyConfigPathOrThrow } from "./config-paths.js";
+import { initRunlyProject } from "./init.js";
 import { runMatrix } from "./run-matrix.js";
 import type { RunlyConfig } from "./types.js";
-
-const CANDIDATES = ["runly.config.mjs", "runly.config.js", "runly.config.cjs"];
-
-function resolveConfigPath(explicit?: string): string {
-  if (explicit) return resolve(explicit);
-  for (const name of CANDIDATES) {
-    const p = resolve(process.cwd(), name);
-    if (existsSync(p)) return p;
-  }
-  throw new Error(
-    `No config found. Create ${CANDIDATES.join(" or ")} or pass -c /path/to/runly.config.mjs`,
-  );
-}
 
 async function loadConfig(configPath: string): Promise<RunlyConfig> {
   const abs = resolve(configPath);
@@ -31,15 +19,48 @@ async function loadConfig(configPath: string): Promise<RunlyConfig> {
   return c;
 }
 
+function printHelp(): void {
+  console.error(`Runly — run one command per Node version (matrix)
+
+Usage:
+  runly                  Load config from cwd and run the matrix
+  runly init             Create runly.config.js and add npm script "runly"
+  runly -c <file>        Use a specific config file
+
+Examples:
+  npx runly init
+  npm run runly
+
+Docs: https://github.com/hamdymohamedak/Runly`);
+}
+
 async function main() {
   const args = process.argv.slice(2);
+
+  if (args[0] === "help" || args[0] === "--help" || args[0] === "-h") {
+    printHelp();
+    process.exit(0);
+  }
+
+  if (args[0] === "init") {
+    const r = initRunlyProject(process.cwd());
+    if (r === "exists") {
+      console.error("A Runly config already exists (runly.config.mjs, .js, or .cjs). Nothing to do.");
+      process.exit(0);
+    }
+    console.error(
+      "Created runly.config.js with default matrix. Added npm script \"runly\" if package.json is present.",
+    );
+    process.exit(0);
+  }
+
   const configFlag = args.findIndex((a) => a === "-c" || a === "--config");
   let explicit: string | undefined;
   if (configFlag >= 0 && args[configFlag + 1]) {
     explicit = args[configFlag + 1];
   }
 
-  const configPath = resolveConfigPath(explicit);
+  const configPath = resolveRunlyConfigPathOrThrow(process.cwd(), explicit);
   const config = await loadConfig(configPath);
   const results = await runMatrix(config);
 

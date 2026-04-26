@@ -28,16 +28,35 @@ npm install -D @hamdymohamedak/runly
 
 The executable name is **`runly`** (see `bin` in `package.json`).
 
+### First-time setup (`init`)
+
+From your project root, create a default `runly.config.js` and add an npm script **`runly`** when `package.json` exists:
+
+```bash
+npx runly init
+```
+
+If any of `runly.config.mjs`, `runly.config.js`, or `runly.config.cjs` already exists, `init` does nothing (idempotent).
+
+### Run the matrix
+
 From the directory that contains your config:
 
 ```bash
 npx runly
 ```
 
+Or, after `init`:
+
+```bash
+npm run runly
+```
+
 Without adding a dev dependency:
 
 ```bash
 npx @hamdymohamedak/runly
+npx @hamdymohamedak/runly init   # scaffold config in cwd
 ```
 
 ---
@@ -114,15 +133,18 @@ export default defineConfig({
 });
 ```
 
-Exported types include `RunlyConfig` and `RunlyRun` for use in your own tooling.
+Exported types include `RunlyConfig` and `RunlyRun`. **`loadConfig(cwd?)`** loads the first config file in `cwd` (same discovery as the CLI) or throws with a hint to run **`npx runly init`**. **`initRunlyProject(cwd?)`** is the programmatic equivalent of **`runly init`**.
 
 ---
 
 ## CLI
 
-| Flag | Description |
-|------|-------------|
+| Command / flag | Description |
+|----------------|-------------|
+| `runly init` | Create `runly.config.js` with defaults and add `"runly": "runly"` to `package.json` when present. No-op if a config file already exists. |
+| `runly`, `runly -c <path>` | Run the matrix (search for config in cwd, or use `-c` / `--config`). |
 | `-c`, `--config` | Path to a config file. If omitted, Runly searches for `runly.config.mjs`, then `.js`, then `.cjs` in the current working directory. |
+| `runly help` | Print usage. |
 
 ---
 
@@ -147,7 +169,7 @@ On Windows, `npx.cmd` is used for the resolution step.
 
 ## Continuous integration
 
-Install dependencies as usual, ensure Node and npm are available, then invoke `npx runly` (or `npx @hamdymohamedak/runly`) from the repository root where the config lives. No extra global Node switcher is required on the runner image as long as `npx` can fetch the `node` package.
+Install dependencies as usual, ensure Node and npm are available. If the repo has no Runly config yet, run **`npx runly init`** once at the root (or commit a config file). Then invoke **`npx runly`** (or **`npm run runly`**) from the repository root. No extra global Node switcher is required on the runner image as long as `npx` can fetch the `node` package.
 
 ---
 

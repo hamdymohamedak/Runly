@@ -3,8 +3,9 @@ name: runly
 description: >-
   Runs the same Node.js command under multiple Node versions from one config file
   (runly.config.mjs/js/cjs), resolving each runtime via npx and the npm `node`
-  package. Use when the user mentions Runly, @hamdymohamedak/runly, multi-version
-  Node testing, Node matrix in CI, runly.config, or running tests across Node 18/20/22.
+  package. Use `runly init` to scaffold config and npm script; use `loadConfig()` in code.
+  Use when the user mentions Runly, @hamdymohamedak/runly, multi-version Node testing,
+  Node matrix in CI, runly.config, or running tests across Node 18/20/22.
 ---
 
 # Runly
@@ -12,7 +13,7 @@ description: >-
 ## What it is
 
 - **npm package**: `@hamdymohamedak/runly` (scoped; unscoped name `runly` is blocked on npm as too similar to `runjs`).
-- **CLI binary name**: `runly` (after `npm install`, use `npx runly` from the project root).
+- **CLI binary name**: `runly` — use **`npx runly init`** once to create config + **`npm run runly`**, or **`npx runly`** for one-off runs.
 - **Purpose**: For each entry in `versions`, resolve a real `node` binary for that spec, prepend its directory to `PATH`, then spawn the configured command so that command’s default `node` is that matrix version—without requiring nvm/fnm/asdf on the machine.
 
 ## Requirements
@@ -30,7 +31,23 @@ One-off without saving to `package.json`:
 
 ```bash
 npx @hamdymohamedak/runly
+npx @hamdymohamedak/runly init
 ```
+
+## `runly init` (scaffold)
+
+From the **project root** (after **`npm install -D @hamdymohamedak/runly`**):
+
+```bash
+npx runly init
+```
+
+- Creates **`runly.config.js`** only if none of **`runly.config.mjs`**, **`runly.config.js`**, or **`runly.config.cjs`** exists (otherwise prints a message and exits **0**).
+- Uses **`export default`** when **`package.json`** has **`"type": "module"`**, else **`module.exports`**.
+- Adds **`"runly": "runly"`** under **`scripts`** in **`package.json`** when the file exists and **`scripts.runly`** is not already set.
+- Default **`run`** in the scaffold is a small **`node -e`** smoke command; edit to **`node --test`**, **`npm test`**, etc.
+
+Programmatic: **`initRunlyProject(cwd)`** from **`@hamdymohamedak/runly`**.
 
 ## Config file discovery
 
@@ -40,7 +57,7 @@ From **current working directory**, first file that exists:
 2. `runly.config.js`
 3. `runly.config.cjs`
 
-Override: `runly -c /path/to/config.mjs` or `runly --config /path/to/config.mjs`.
+Override: `runly -c /path/to/config.mjs` or `runly --config /path/to/runly.config.mjs`.
 
 Config must be **JavaScript** (ESM or CJS). Runly does **not** load `.ts` configs unless the user wires a loader themselves. Export **`default`** as the config object (or the module’s default export after dynamic `import()`).
 
@@ -95,15 +112,16 @@ export default defineConfig({
 });
 ```
 
-Exported types: **`RunlyConfig`**, **`RunlyRun`**. The matrix runner **`runMatrix`** lives in source but is **not** part of the published `exports`—treat **`defineConfig` + types** as the library surface for dependents.
+Exported types: **`RunlyConfig`**, **`RunlyRun`**. **`loadConfig(cwd?)`** loads the default config or throws with a hint to run **`npx runly init`**. The matrix runner **`runMatrix`** is not exported—use the CLI or compose from source.
 
 ## CLI
 
-| Flag | Meaning |
-|------|---------|
+| Command / flag | Meaning |
+|----------------|---------|
+| `runly init` | Scaffold **`runly.config.js`** and **`scripts.runly`** (see above). |
+| `runly` | Run matrix using config in cwd. |
 | `-c`, `--config` | Path to config file. |
-
-No other flags in the current CLI.
+| `runly help` | Usage. |
 
 ## Exit codes
 
@@ -118,7 +136,7 @@ No other flags in the current CLI.
 
 ## CI
 
-Install deps, `cd` to repo root (or set `cwd` in config), run `npx runly`. No global version manager required if `npx` can fetch the `node` package.
+Install deps, `cd` to repo root, run **`npx runly init`** once if the repo has no config, then **`npm run runly`** or **`npx runly`**. No global version manager required if `npx` can fetch the `node` package.
 
 ## Limitations
 
@@ -128,8 +146,8 @@ Install deps, `cd` to repo root (or set `cwd` in config), run `npx runly`. No gl
 
 ## Reference in this repo
 
-- User-facing docs: [README.md](../../../README.md)
-- Working demo: [matrix-demo/](../../../matrix-demo/) (`npm install` + `npm run matrix` from that folder; uses `file:..` to depend on the parent package).
+- User-facing docs: [README.md](../../../../README.md)
+- Example config: [examples/all-versions-pass/runly.config.mjs](../../../../examples/all-versions-pass/runly.config.mjs)
 
 ## Links
 

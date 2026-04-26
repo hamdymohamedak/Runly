@@ -1,5 +1,6 @@
-# Cross-OS × host Node matrix: build Runly, run smoke tests, execute Runly against
-# multiple Node runtimes via npx (no nvm on the runner).
+# Cross-OS × host Node matrix: build Runly, verify `runly init` scaffolds a consumer
+# (runly.config.js + scripts.runly + npm run runly) from the packed tarball, smoke tests,
+# then Runly e2e against multiple Node runtimes via npx (no nvm on the runner).
 name: CI
 
 on:
@@ -38,6 +39,9 @@ jobs:
 
       - name: Typecheck / build
         run: npm run build
+
+      - name: runly init scaffold (pack tarball → CJS & ESM consumers → npm run runly)
+        run: npm run ci:verify-init
 
       - name: Unit smoke (repo test/)
         run: node --test test/smoke.test.js

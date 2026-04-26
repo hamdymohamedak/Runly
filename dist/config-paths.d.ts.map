@@ -1,0 +1,1 @@
+{"version":3,"file":"config-paths.d.ts","sourceRoot":"","sources":["../src/config-paths.ts"],"names":[],"mappings":"AAGA,eAAO,MAAM,uBAAuB,sEAAuE,CAAC;AAE5G,wBAAgB,iBAAiB,CAAC,GAAG,EAAE,MAAM,GAAG,OAAO,CAKtD;AAED,sDAAsD;AACtD,wBAAgB,mBAAmB,CAAC,GAAG,EAAE,MAAM,GAAG,MAAM,GAAG,IAAI,CAM9D;AAED,wBAAgB,6BAA6B,CAAC,GAAG,EAAE,MAAM,EAAE,QAAQ,CAAC,EAAE,MAAM,GAAG,MAAM,CAOpF"}

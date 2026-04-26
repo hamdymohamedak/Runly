@@ -146,8 +146,8 @@ Install deps, `cd` to repo root, run **`npx runly init`** once if the repo has n
 
 ## Reference in this repo
 
-- User-facing docs: [README.md](../../../README.md)
-- Example config: [examples/all-versions-pass/runly.config.mjs](../../../examples/all-versions-pass/runly.config.mjs)
+- User-facing docs: [README.md](../README.md)
+- Example config: [examples/all-versions-pass/runly.config.mjs](../examples/all-versions-pass/runly.config.mjs)
 
 ## Links
 
