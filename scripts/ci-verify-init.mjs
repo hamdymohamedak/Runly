@@ -4,10 +4,10 @@
  * runly.config.js + SKILL.md + scripts.runly, then `npm run runly`.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const PKG = "@hamdymohamedak/runly";
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
@@ -22,7 +22,8 @@ function run(cmd, args, opts = {}) {
 const version = JSON.parse(readFileSync(join(repoRoot, "package.json"), "utf8")).version;
 const packDir = mkdtempSync(join(tmpdir(), "runly-pack-"));
 run("npm", ["pack", "--pack-destination", packDir, "--ignore-scripts"]);
-const tgz = join(packDir, `hamdymohamedak-runly-${version}.tgz`);
+const tgzName = `hamdymohamedak-runly-${version}.tgz`;
+const tgz = join(packDir, tgzName);
 if (!existsSync(tgz)) {
   console.error("ci-verify-init: tarball missing:", tgz);
   process.exit(1);
@@ -30,11 +31,14 @@ if (!existsSync(tgz)) {
 
 function verifyConsumer(label, pkgJson, assertConfig) {
   const consumer = mkdtempSync(join(tmpdir(), `runly-consumer-${label}-`));
+  // Copy tarball into the consumer tree and use file:./… so npm on Windows does not choke on
+  // absolute file:// URLs (8.3 paths like RUNNER~1, %7E encoding, integrity null).
+  copyFileSync(tgz, join(consumer, tgzName));
   const body = {
     ...pkgJson,
     dependencies: {
       ...(pkgJson.dependencies && typeof pkgJson.dependencies === "object" ? pkgJson.dependencies : {}),
-      [PKG]: pathToFileURL(tgz).href,
+      [PKG]: `file:./${tgzName}`,
     },
   };
   writeFileSync(join(consumer, "package.json"), `${JSON.stringify(body, null, 2)}\n`);

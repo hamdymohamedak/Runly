@@ -25,6 +25,7 @@ function defaultConfigBody() {
     shell: false,
   },
 }`;
+}
 function tryAddRunlyScriptToDisk(cwd) {
     const pkgPath = join(cwd, "package.json");
     if (!existsSync(pkgPath))
@@ -46,12 +47,14 @@ function tryAddRunlyScriptToDisk(cwd) {
     pkg.scripts = scripts;
     writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 }
+/** Path to bundled `templates/SKILL.md` inside the installed package (next to `dist/`). */
 function bundledSkillTemplatePath() {
     const here = dirname(fileURLToPath(import.meta.url));
     const packageRoot = join(here, "..");
     const p = join(packageRoot, "templates", SKILL_FILE);
     return existsSync(p) ? p : null;
 }
+/** Copy agent skill template next to config; skip if `SKILL.md` already exists. */
 function tryWriteSkillTemplate(cwd) {
     const target = join(cwd, SKILL_FILE);
     if (existsSync(target))
@@ -63,9 +66,13 @@ function tryWriteSkillTemplate(cwd) {
         writeFileSync(target, readFileSync(src, "utf8"));
     }
     catch {
-        /* ignore */
+        /* ignore missing or unreadable template */
     }
 }
+/**
+ * Create `runly.config.js` with defaults, copy `SKILL.md` when absent, and add `"runly": "runly"` to package.json when possible.
+ * @returns `"exists"` if any runly config file is already present, otherwise `"created"`.
+ */
 export function initRunlyProject(cwd) {
     if (hasAnyRunlyConfig(cwd))
         return "exists";
@@ -80,3 +87,4 @@ export function initRunlyProject(cwd) {
     tryAddRunlyScriptToDisk(cwd);
     return "created";
 }
+//# sourceMappingURL=init.js.map

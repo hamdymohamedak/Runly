@@ -3,3 +3,4 @@
  * @returns `"exists"` if any runly config file is already present, otherwise `"created"`.
  */
 export declare function initRunlyProject(cwd: string): "exists" | "created";
+//# sourceMappingURL=init.d.ts.map
