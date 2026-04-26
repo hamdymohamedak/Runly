@@ -1,6 +1,6 @@
 {
   "name": "@hamdymohamedak/runly",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publishConfig": {
     "access": "public"
   },
@@ -19,9 +19,11 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "scripts/postinstall.mjs"
   ],
   "scripts": {
+    "postinstall": "node ./scripts/postinstall.mjs",
     "test": "node --test test/smoke.test.js",
     "ci:runly-smoke": "node dist/cli.js -c examples/all-versions-pass/runly.config.mjs",
     "build": "tsc",

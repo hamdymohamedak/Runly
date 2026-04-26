@@ -8,6 +8,8 @@ function npxCmd() {
 }
 export function resolveNodeExecPath(versionSpec, cwd) {
     return new Promise((resolve, reject) => {
+        // Windows: spawning `.cmd` without a shell often yields `spawn EINVAL` (Node + libuv).
+        // Use `shell: true` so `npx.cmd` runs under the default shell (cmd.exe).
         const win32 = process.platform === "win32";
         const child = spawn(npxCmd(), [
             "--yes",
