@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * CI: pack this repo, install tarball into fresh consumers, run `runly init`, assert
- * runly.config.js + scripts.runly, then `npm run runly`.
+ * runly.config.js + SKILL.md + scripts.runly, then `npm run runly`.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -48,6 +48,16 @@ function verifyConsumer(label, pkgJson, assertConfig) {
     process.exit(1);
   }
   assertConfig(readFileSync(cfg, "utf8"));
+
+  const skill = join(consumer, "SKILL.md");
+  if (!existsSync(skill)) {
+    console.error(`[${label}] missing SKILL.md after runly init`);
+    process.exit(1);
+  }
+  if (!readFileSync(skill, "utf8").includes("name: runly")) {
+    console.error(`[${label}] SKILL.md looks invalid`);
+    process.exit(1);
+  }
 
   const installed = JSON.parse(readFileSync(join(consumer, "package.json"), "utf8"));
   if (installed.scripts?.runly !== "runly") {

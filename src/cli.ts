@@ -49,7 +49,7 @@ async function main() {
       process.exit(0);
     }
     console.error(
-      "Created runly.config.js with default matrix. Added npm script \"runly\" if package.json is present.",
+      "Created runly.config.js with default matrix, SKILL.md (if missing), and npm script \"runly\" if package.json is present.",
     );
     process.exit(0);
   }

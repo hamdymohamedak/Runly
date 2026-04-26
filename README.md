@@ -30,13 +30,13 @@ The executable name is **`runly`** (see `bin` in `package.json`).
 
 ### First-time setup (`init`)
 
-From your project root, create a default `runly.config.js` and add an npm script **`runly`** when `package.json` exists:
+From your project root, create a default `runly.config.js`, a **`SKILL.md`** agent-skill template (when `SKILL.md` is not already present), and add an npm script **`runly`** when `package.json` exists:
 
 ```bash
 npx runly init
 ```
 
-If any of `runly.config.mjs`, `runly.config.js`, or `runly.config.cjs` already exists, `init` does nothing (idempotent).
+If any of `runly.config.mjs`, `runly.config.js`, or `runly.config.cjs` already exists, `init` does nothing for the config (idempotent). Existing **`SKILL.md`** is never overwritten.
 
 ### Run the matrix
 
@@ -141,7 +141,7 @@ Exported types include `RunlyConfig` and `RunlyRun`. **`loadConfig(cwd?)`** load
 
 | Command / flag | Description |
 |----------------|-------------|
-| `runly init` | Create `runly.config.js` with defaults and add `"runly": "runly"` to `package.json` when present. No-op if a config file already exists. |
+| `runly init` | Create `runly.config.js` with defaults, copy **`SKILL.md`** when missing, and add `"runly": "runly"` to `package.json` when present. No-op for config if a config file already exists. |
 | `runly`, `runly -c <path>` | Run the matrix (search for config in cwd, or use `-c` / `--config`). |
 | `-c`, `--config` | Path to a config file. If omitted, Runly searches for `runly.config.mjs`, then `.js`, then `.cjs` in the current working directory. |
 | `runly help` | Print usage. |

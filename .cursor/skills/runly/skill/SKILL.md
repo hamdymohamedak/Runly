@@ -43,6 +43,7 @@ npx runly init
 ```
 
 - Creates **`runly.config.js`** only if none of **`runly.config.mjs`**, **`runly.config.js`**, or **`runly.config.cjs`** exists (otherwise prints a message and exits **0**).
+- Writes **`SKILL.md`** in the project root when missing (Cursor agent skill template from the package); you may move it to **`.cursor/skills/runly/SKILL.md`**.
 - Uses **`export default`** when **`package.json`** has **`"type": "module"`**, else **`module.exports`**.
 - Adds **`"runly": "runly"`** under **`scripts`** in **`package.json`** when the file exists and **`scripts.runly`** is not already set.
 - Default **`run`** in the scaffold is a small **`node -e`** smoke command; edit to **`node --test`**, **`npm test`**, etc.
@@ -118,7 +119,7 @@ Exported types: **`RunlyConfig`**, **`RunlyRun`**. **`loadConfig(cwd?)`** loads 
 
 | Command / flag | Meaning |
 |----------------|---------|
-| `runly init` | Scaffold **`runly.config.js`** and **`scripts.runly`** (see above). |
+| `runly init` | Scaffold **`runly.config.js`**, **`SKILL.md`** (if missing), and **`scripts.runly`** (see above). |
 | `runly` | Run matrix using config in cwd. |
 | `-c`, `--config` | Path to config file. |
 | `runly help` | Usage. |

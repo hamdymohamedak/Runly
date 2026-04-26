@@ -42,7 +42,7 @@ async function main() {
             console.error("A Runly config already exists (runly.config.mjs, .js, or .cjs). Nothing to do.");
             process.exit(0);
         }
-        console.error("Created runly.config.js with default matrix. Added npm script \"runly\" if package.json is present.");
+        console.error("Created runly.config.js with default matrix, SKILL.md (if missing), and npm script \"runly\" if package.json is present.");
         process.exit(0);
     }
     const configFlag = args.findIndex((a) => a === "-c" || a === "--config");

@@ -43,6 +43,7 @@ npx runly init
 ```
 
 - Creates **`runly.config.js`** only if none of **`runly.config.mjs`**, **`runly.config.js`**, or **`runly.config.cjs`** exists (otherwise prints a message and exits **0**).
+- Writes **`SKILL.md`** in the project root (from the package template) when **`SKILL.md`** does not already exist—useful for Cursor agent skills (you can move it to **`.cursor/skills/runly/SKILL.md`** if you prefer).
 - Uses **`export default`** when **`package.json`** has **`"type": "module"`**, else **`module.exports`**.
 - Adds **`"runly": "runly"`** under **`scripts`** in **`package.json`** when the file exists and **`scripts.runly`** is not already set.
 - Default **`run`** in the scaffold is a small **`node -e`** smoke command; edit to **`node --test`**, **`npm test`**, etc.
@@ -118,7 +119,7 @@ Exported types: **`RunlyConfig`**, **`RunlyRun`**. **`loadConfig(cwd?)`** loads 
 
 | Command / flag | Meaning |
 |----------------|---------|
-| `runly init` | Scaffold **`runly.config.js`** and **`scripts.runly`** (see above). |
+| `runly init` | Scaffold **`runly.config.js`**, **`SKILL.md`**, and **`scripts.runly`** (see above). |
 | `runly` | Run matrix using config in cwd. |
 | `-c`, `--config` | Path to config file. |
 | `runly help` | Usage. |
@@ -144,10 +145,10 @@ Install deps, `cd` to repo root, run **`npx runly init`** once if the repo has n
 - Windows: `npx.cmd` for resolution; usual Windows spawn/shell rules apply.
 - Package **`bin`** in `package.json` must use paths like `dist/cli.js` (no `./` prefix)—npm may strip invalid `bin` entries on publish.
 
-## Reference in this repo
+## Reference
 
-- User-facing docs: [README.md](../README.md)
-- Example config: [examples/all-versions-pass/runly.config.mjs](../examples/all-versions-pass/runly.config.mjs)
+- README: [https://github.com/hamdymohamedak/Runly#readme](https://github.com/hamdymohamedak/Runly#readme)
+- npm: [https://www.npmjs.com/package/@hamdymohamedak/runly](https://www.npmjs.com/package/@hamdymohamedak/runly)
 
 ## Links
 

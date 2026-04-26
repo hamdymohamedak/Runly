@@ -1,9 +1,11 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { hasAnyRunlyConfig } from "./config-paths.js";
 
 const PKG = "@hamdymohamedak/runly";
 const DEFAULT_FILE = "runly.config.js";
+const SKILL_FILE = "SKILL.md";
 
 function readPkgJson(cwd: string) {
   const p = join(cwd, "package.json");
@@ -46,8 +48,29 @@ function tryAddRunlyScriptToDisk(cwd: string): void {
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 }
 
+/** Path to bundled `templates/SKILL.md` inside the installed package (next to `dist/`). */
+function bundledSkillTemplatePath(): string | null {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const packageRoot = join(here, "..");
+  const p = join(packageRoot, "templates", SKILL_FILE);
+  return existsSync(p) ? p : null;
+}
+
+/** Copy agent skill template next to config; skip if `SKILL.md` already exists. */
+function tryWriteSkillTemplate(cwd: string): void {
+  const target = join(cwd, SKILL_FILE);
+  if (existsSync(target)) return;
+  const src = bundledSkillTemplatePath();
+  if (!src) return;
+  try {
+    writeFileSync(target, readFileSync(src, "utf8"));
+  } catch {
+    /* ignore missing or unreadable template */
+  }
+}
+
 /**
- * Create `runly.config.js` with defaults and add `"runly": "runly"` to package.json when possible.
+ * Create `runly.config.js` with defaults, copy `SKILL.md` when absent, and add `"runly": "runly"` to package.json when possible.
  * @returns `"exists"` if any runly config file is already present, otherwise `"created"`.
  */
 export function initRunlyProject(cwd: string): "exists" | "created" {
@@ -61,6 +84,7 @@ export function initRunlyProject(cwd: string): "exists" | "created" {
     : `/** @type {import("${PKG}").RunlyConfig} */\nmodule.exports = ${body};\n`;
 
   writeFileSync(join(cwd, DEFAULT_FILE), content, "utf8");
+  tryWriteSkillTemplate(cwd);
   tryAddRunlyScriptToDisk(cwd);
   return "created";
 }
