@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { runMatrix } from "./run-matrix.js";
-const CANDIDATES = ["vintest.config.mjs", "vintest.config.js", "vintest.config.cjs"];
+const CANDIDATES = ["runly.config.mjs", "runly.config.js", "runly.config.cjs"];
 function resolveConfigPath(explicit) {
     if (explicit)
         return resolve(explicit);
@@ -12,7 +12,7 @@ function resolveConfigPath(explicit) {
         if (existsSync(p))
             return p;
     }
-    throw new Error(`No config found. Create ${CANDIDATES.join(" or ")} or pass -c /path/to/config.mjs`);
+    throw new Error(`No config found. Create ${CANDIDATES.join(" or ")} or pass -c /path/to/runly.config.mjs`);
 }
 async function loadConfig(configPath) {
     const abs = resolve(configPath);

@@ -1,10 +1,10 @@
 {
   "name": "version-sensitive-app",
   "private": true,
-  "description": "Sample app using JS APIs only available in newer Node — use with vintest to see old versions fail.",
+  "description": "Sample app using JS APIs only available in newer Node — use with Runly to see old versions fail.",
   "type": "module",
   "scripts": {
     "test": "node --test test/",
-    "vintest": "node ../../dist/cli.js -c ./vintest.config.mjs"
+    "runly": "node ../../dist/cli.js -c ./runly.config.mjs"
   }
 }

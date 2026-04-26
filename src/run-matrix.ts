@@ -1,8 +1,8 @@
 import { spawn } from "node:child_process";
-import type { VintestConfig, VintestRun } from "./types.js";
+import type { RunlyConfig, RunlyRun } from "./types.js";
 import { nodeBinDir, prependDirToPath, resolveNodeExecPath } from "./resolve-node.js";
 
-function normalizeRun(run: VintestRun): { argv: string[]; shell: boolean } {
+function normalizeRun(run: RunlyRun): { argv: string[]; shell: boolean } {
   if (typeof run === "string") {
     return { argv: [run], shell: true };
   }
@@ -15,7 +15,7 @@ export interface MatrixResult {
   exitCode: number | null;
 }
 
-export async function runMatrix(config: VintestConfig): Promise<MatrixResult[]> {
+export async function runMatrix(config: RunlyConfig): Promise<MatrixResult[]> {
   const cwd = config.cwd ?? process.cwd();
   const results: MatrixResult[] = [];
   const { argv, shell } = normalizeRun(config.run);

@@ -1,8 +1,8 @@
-# Vintest
+# Runly
 
 **Run the same test command under multiple Node.js versions**—similar in spirit to how [Playwright](https://playwright.dev/) runs one suite across multiple browser engines, but for the Node runtime matrix instead.
 
-Vintest resolves each requested version via the official [`node`](https://www.npmjs.com/package/node) package (`npx`), prepends that binary to `PATH`, and executes your configured command. You get real runtime behavior per version without maintaining a local `nvm`/`fnm` layout for CI or your team.
+Runly resolves each requested version via the official [`node`](https://www.npmjs.com/package/node) package (`npx`), prepends that binary to `PATH`, and executes your configured command. You get real runtime behavior per version without maintaining a local `nvm`/`fnm` layout for CI or your team.
 
 ---
 
@@ -16,7 +16,7 @@ Vintest resolves each requested version via the official [`node`](https://www.np
 
 ## Requirements
 
-- **Node.js** ≥ 18 (for running the Vintest CLI itself).
+- **Node.js** ≥ 18 (for running the Runly CLI itself).
 - **npm** with **`npx`** available (used to fetch `node@<version>` binaries). First runs may download caches; later runs are faster.
 
 ---
@@ -26,13 +26,13 @@ Vintest resolves each requested version via the official [`node`](https://www.np
 ### From npm
 
 ```bash
-npm install -D vintest
+npm install -D runly
 ```
 
-Run the CLI (from your project root, next to `vintest.config.mjs`):
+Run the CLI (from your project root, next to `runly.config.mjs`):
 
 ```bash
-npx vintest
+npx runly
 ```
 
 ---
@@ -41,11 +41,11 @@ npx vintest
 
 1. Add a config file at the project root (first match wins):
 
-   - `vintest.config.mjs`
-   - `vintest.config.js`
-   - `vintest.config.cjs`
+   - `runly.config.mjs`
+   - `runly.config.js`
+   - `runly.config.cjs`
 
-2. Example `vintest.config.mjs`:
+2. Example `runly.config.mjs`:
 
    ```javascript
    export default {
@@ -61,13 +61,13 @@ npx vintest
 3. From the directory that contains the config:
 
    ```bash
-   npx vintest
+   npx runly
    ```
 
    Or with an explicit config path:
 
    ```bash
-   npx vintest -c ./vintest.config.mjs
+   npx runly -c ./runly.config.mjs
    ```
 
 Exit code **0** means every version passed; **1** means at least one version failed.
@@ -96,10 +96,10 @@ With `npm test`, behavior depends on how scripts invoke `node`; putting the desi
 
 ### TypeScript helper (optional)
 
-If you consume Vintest as a library from compiled output:
+If you consume Runly as a library from compiled output:
 
 ```javascript
-import { defineConfig } from "vintest";
+import { defineConfig } from "runly";
 
 export default defineConfig({
   versions: ["18", "20", "22"],
@@ -115,19 +115,19 @@ The CLI loads **JavaScript** configs by default. TypeScript configs (`.ts`) are 
 
 | Flag | Description |
 |------|-------------|
-| `-c`, `--config` | Path to a config file. If omitted, Vintest looks for `vintest.config.mjs`, then `.js`, then `.cjs` in the current working directory. |
+| `-c`, `--config` | Path to a config file. If omitted, Runly looks for `runly.config.mjs`, then `.js`, then `.cjs` in the current working directory. |
 
 ---
 
 ## Example idea
 
-If your tests rely on a **newer-only** Node API (for example a built-in module), running Vintest across `18`, `20`, and `22` will show which lines pass and which fail—without static analysis, by executing the same command under each runtime.
+If your tests rely on a **newer-only** Node API (for example a built-in module), running Runly across `18`, `20`, and `22` will show which lines pass and which fail—without static analysis, by executing the same command under each runtime.
 
 ---
 
 ## How it works (short)
 
-1. For each entry in `versions`, Vintest runs `npx` to resolve the absolute path to that version’s `node` binary.
+1. For each entry in `versions`, Runly runs `npx` to resolve the absolute path to that version’s `node` binary.
 2. It prepends that binary’s directory to `PATH` for the child process.
 3. It spawns your `run` command with inherited stdio so logs look like a normal local test run, prefixed by a banner per version.
 
@@ -155,5 +155,5 @@ Inspired by the **multi-target** workflow popularized by browser test runners. N
 
 ## More
 
-- **Package on npm**: [npmjs.com/package/vintest](https://www.npmjs.com/package/vintest)
+- **Package on npm**: [npmjs.com/package/runly](https://www.npmjs.com/package/runly)
 - **Source and issues**: [github.com/hamdymohamedak/Vintest](https://github.com/hamdymohamedak/Vintest)

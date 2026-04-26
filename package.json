@@ -1,10 +1,10 @@
 {
-  "name": "vintest",
+  "name": "runly",
   "version": "0.1.0",
-  "description": "Run the same tests under multiple Node.js versions (Playwright-style matrix)",
+  "description": "Runly — run the same tests under multiple Node.js versions (Playwright-style matrix)",
   "type": "module",
   "bin": {
-    "vintest": "./dist/cli.js"
+    "runly": "./dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,7 +23,7 @@
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build",
     "test:self": "node --test dist/**/*.test.js",
-    "vintest": "node dist/cli.js"
+    "runly": "node dist/cli.js"
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "node": ">=18"
   },
   "keywords": [
+    "runly",
     "node",
     "nodejs",
     "testing",

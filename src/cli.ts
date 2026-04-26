@@ -3,9 +3,9 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { runMatrix } from "./run-matrix.js";
-import type { VintestConfig } from "./types.js";
+import type { RunlyConfig } from "./types.js";
 
-const CANDIDATES = ["vintest.config.mjs", "vintest.config.js", "vintest.config.cjs"];
+const CANDIDATES = ["runly.config.mjs", "runly.config.js", "runly.config.cjs"];
 
 function resolveConfigPath(explicit?: string): string {
   if (explicit) return resolve(explicit);
@@ -14,14 +14,14 @@ function resolveConfigPath(explicit?: string): string {
     if (existsSync(p)) return p;
   }
   throw new Error(
-    `No config found. Create ${CANDIDATES.join(" or ")} or pass -c /path/to/config.mjs`,
+    `No config found. Create ${CANDIDATES.join(" or ")} or pass -c /path/to/runly.config.mjs`,
   );
 }
 
-async function loadConfig(configPath: string): Promise<VintestConfig> {
+async function loadConfig(configPath: string): Promise<RunlyConfig> {
   const abs = resolve(configPath);
-  const mod = (await import(pathToFileURL(abs).href)) as { default?: VintestConfig };
-  const c = mod.default ?? (mod as unknown as VintestConfig);
+  const mod = (await import(pathToFileURL(abs).href)) as { default?: RunlyConfig };
+  const c = mod.default ?? (mod as unknown as RunlyConfig);
   if (!c?.versions?.length) {
     throw new Error("Config must export `versions` (non-empty array)");
   }

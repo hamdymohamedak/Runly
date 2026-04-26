@@ -1,7 +1,7 @@
-import type { VintestConfig } from "./types.js";
+import type { RunlyConfig } from "./types.js";
 
-export type { VintestConfig, VintestRun } from "./types.js";
+export type { RunlyConfig, RunlyRun } from "./types.js";
 
-export function defineConfig(config: VintestConfig): VintestConfig {
+export function defineConfig(config: RunlyConfig): RunlyConfig {
   return config;
 }
