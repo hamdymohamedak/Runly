@@ -8,23 +8,44 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
     "test:self": "node --test dist/**/*.test.js",
     "vintest": "node dist/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hamdymohamedak/Vintest.git"
+  },
+  "homepage": "https://github.com/hamdymohamedak/Vintest#readme",
+  "bugs": {
+    "url": "https://github.com/hamdymohamedak/Vintest/issues"
   },
   "engines": {
     "node": ">=18"
   },
   "keywords": [
     "node",
+    "nodejs",
     "testing",
+    "test",
     "matrix",
-    "multi-version"
+    "multi-version",
+    "compatibility",
+    "npx",
+    "ci"
   ],
   "license": "MIT",
   "devDependencies": {
