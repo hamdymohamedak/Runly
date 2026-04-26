@@ -1,0 +1,137 @@
+---
+name: runly
+description: >-
+  Runs the same Node.js command under multiple Node versions from one config file
+  (runly.config.mjs/js/cjs), resolving each runtime via npx and the npm `node`
+  package. Use when the user mentions Runly, @hamdymohamedak/runly, multi-version
+  Node testing, Node matrix in CI, runly.config, or running tests across Node 18/20/22.
+---
+
+# Runly
+
+## What it is
+
+- **npm package**: `@hamdymohamedak/runly` (scoped; unscoped name `runly` is blocked on npm as too similar to `runjs`).
+- **CLI binary name**: `runly` (after `npm install`, use `npx runly` from the project root).
+- **Purpose**: For each entry in `versions`, resolve a real `node` binary for that spec, prepend its directory to `PATH`, then spawn the configured command so that command’s default `node` is that matrix version—without requiring nvm/fnm/asdf on the machine.
+
+## Requirements
+
+- Node **≥ 18** for the Runly CLI process.
+- **npm** with **npx** (first-time version resolution may hit the network).
+
+## Install
+
+```bash
+npm install -D @hamdymohamedak/runly
+```
+
+One-off without saving to `package.json`:
+
+```bash
+npx @hamdymohamedak/runly
+```
+
+## Config file discovery
+
+From **current working directory**, first file that exists:
+
+1. `runly.config.mjs`
+2. `runly.config.js`
+3. `runly.config.cjs`
+
+Override: `runly -c /path/to/config.mjs` or `runly --config /path/to/config.mjs`.
+
+Config must be **JavaScript** (ESM or CJS). Runly does **not** load `.ts` configs unless the user wires a loader themselves. Export **`default`** as the config object (or the module’s default export after dynamic `import()`).
+
+## Config shape (`RunlyConfig`)
+
+| Field | Type | Required | Notes |
+|-------|------|----------|--------|
+| `versions` | `string[]` | Yes | Non-empty. Each string is an npm **`node`** package spec (e.g. `"20"`, `"20.10.0"`, `"lts/*"`). Passed as `node@<spec>` when resolving. |
+| `run` | `RunlyRun` | Yes | See below. |
+| `cwd` | `string` | No | Child `cwd`; default Runly’s `process.cwd()`. |
+| `bail` | `boolean` | No | If `true`, stop after first failing version. Default `false`. |
+| `env` | `NodeJS.ProcessEnv` | No | Merged into child env; `PATH` is overridden per row so matrix `node` is first. |
+
+### `RunlyRun`
+
+- **String**: treated as one shell command → `spawn` with **`shell: true`** (single string in argv).
+- **`{ argv: string[]; shell?: boolean }`**: `spawn(argv[0], argv.slice(1), { shell, stdio: 'inherit' })`. Default **`shell: false`** for array form.
+
+**Guidance**: For predictable use of the matrix Node, prefer **`argv`** whose first token is **`node`** (e.g. `["node", "--test", "test/"]`). String form like `"npm test"` depends on how npm/scripts resolve `node`.
+
+## Minimal examples
+
+```javascript
+// runly.config.mjs
+export default {
+  versions: ["18", "20", "22"],
+  bail: false,
+  run: {
+    argv: ["node", "--test", "test/"],
+    shell: false,
+  },
+};
+```
+
+```javascript
+export default {
+  versions: ["20", "22"],
+  run: "npm test",
+};
+```
+
+## TypeScript / IDE helper
+
+From the same package (public export `"."` only):
+
+```javascript
+import { defineConfig } from "@hamdymohamedak/runly";
+
+export default defineConfig({
+  versions: ["18", "20", "22"],
+  run: { argv: ["node", "--test", "test/"], shell: false },
+});
+```
+
+Exported types: **`RunlyConfig`**, **`RunlyRun`**. The matrix runner **`runMatrix`** lives in source but is **not** part of the published `exports`—treat **`defineConfig` + types** as the library surface for dependents.
+
+## CLI
+
+| Flag | Meaning |
+|------|---------|
+| `-c`, `--config` | Path to config file. |
+
+No other flags in the current CLI.
+
+## Exit codes
+
+- **0**: every version’s child exited with code `0`.
+- **1**: any child non-zero, resolution failure, or config error. stderr includes `Failed: <version list>` when some matrix rows failed.
+
+## Internals (for debugging)
+
+1. Resolve binary: `npx` with `--yes --package node@<versionSpec> -- node -e "process.stdout.write(process.execPath)"` (on Windows: **`npx.cmd`**).
+2. `PATH`: prepend `dirname(process.execPath)` for that Node for the child only.
+3. Output: banner `━━━ Node <spec> ━━━` per row; child **stdio inherited**.
+
+## CI
+
+Install deps, `cd` to repo root (or set `cwd` in config), run `npx runly`. No global version manager required if `npx` can fetch the `node` package.
+
+## Limitations
+
+- Network may be needed for `npx` / registry on cold caches.
+- Windows: `npx.cmd` for resolution; usual Windows spawn/shell rules apply.
+- Package **`bin`** in `package.json` must use paths like `dist/cli.js` (no `./` prefix)—npm may strip invalid `bin` entries on publish.
+
+## Reference in this repo
+
+- User-facing docs: [README.md](../../../README.md)
+- Working demo: [matrix-demo/](../../../matrix-demo/) (`npm install` + `npm run matrix` from that folder; uses `file:..` to depend on the parent package).
+
+## Links
+
+- npm: `https://www.npmjs.com/package/@hamdymohamedak/runly`
+- Source: `https://github.com/hamdymohamedak/Runly`
